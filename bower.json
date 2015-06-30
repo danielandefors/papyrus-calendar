@@ -6,6 +6,15 @@
   ],
   "description": "An element showing a calendar.",
   "license": "MIT",
+  "homepage": "https://github.com/danielandefors/papyrus-calendar/",
+  "main": "papyrus-calendar.html",
+  "keywords": [
+    "web-component",
+    "web-components",
+    "polymer",
+    "calendar",
+    "date"
+  ],
   "ignore": [
     "**/.*",
     "node_modules",
