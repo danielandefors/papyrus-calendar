@@ -15,11 +15,11 @@
     papyrus-calendar {
       margin-right: 2em;
     }
-    #calendar_1 {
+    #calendar_2 {
       --papyrus-calendar-header-bg-color: orange;
       --papyrus-calendar-selected-bg-color: darkGreen;
     }
-    #calendar_2 {
+    #calendar_3 {
       --papyrus-calendar-header-color: white;
       --papyrus-calendar-header-bg-color: darkBlue;
       --papyrus-calendar-selected-color: white;
@@ -35,7 +35,7 @@
     <papyrus-calendar id="calendar_3" min="2015-07-01" max="2015-07-15" value="2015-07-04"></papyrus-calendar>
   </template>
   <p>
-    <paper-button onclick="document.getElementById('calendar_1').today()" raised>Select today's date</paper-button>
+    <paper-button onclick="document.querySelector('#calendar_1').today()" raised>Select today's date</paper-button>
   </p>
 </body>
 </html>

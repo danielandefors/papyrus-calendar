@@ -285,8 +285,6 @@ To set the minimum and/or maximum value:
       // update the display property if it was undefined
       if (!display) {
         display = (value ? value : moment()).startOf('month');
-        this.display = display.format('YYYY-MM');
-        return;
       }
 
       // check bounds
@@ -294,9 +292,16 @@ To set the minimum and/or maximum value:
       if (min && min.isAfter(last)) {
         display = moment(min).startOf('month');
         last = moment(display).endOf('month');
-      } else if (max && display.isAfter(max)) {
+      }
+      if (max && display.isAfter(max)) {
         display = moment(max).startOf('month');
         last = moment(display).endOf('month');
+      }
+
+      // update the display property if it was undefined
+      if (!this._display || !this._display.isSame(display)) {
+        this.display = display.format('YYYY-MM');
+        return;
       }
 
       // update header properties
