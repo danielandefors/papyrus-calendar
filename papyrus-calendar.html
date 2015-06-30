@@ -44,18 +44,13 @@ To set the minimum and/or maximum value:
     user-select: none;
     z-index: 0;
     cursor: default;
-
     --papyrus-calendar-cell-size: 1.75em;
-
     --papyrus-calendar-header-color: var(--primary-text-color);
     --papyrus-calendar-header-bg-color: var(--divider-color);
-
     --papyrus-calendar-disabled-color: var(--disabled-text-color);
     --papyrus-calendar-disabled-bg-color: #f4f4f4;
-
     --papyrus-calendar-selected-color: var(--text-primary-color);
     --papyrus-calendar-selected-bg-color: var(--accent-color);
-
   }
   :host[noink] /deep/ paper-ripple {
     display: none;
@@ -72,31 +67,25 @@ To set the minimum and/or maximum value:
     text-align: center;
     padding: 0;
   }
-
   th {
     color: var(--papyrus-calendar-header-color);
     background-color: var(--papyrus-calendar-header-bg-color);
   }
-
   th paper-icon-button,
   th /deep/ iron-icon {
     width: var(--papyrus-calendar-cell-size);
     height: var(--papyrus-calendar-cell-size);
     padding: 0;
   }
-
   td.day {
     cursor: pointer;
   }
-
   td.day paper-ripple {
     color: var(--papyrus-calendar-selected-bg-color);
   }
-
   td.day-outside-month {
     color: var(--disabled-text-color);
   }
-
   td.day-disabled {
     color: var(--papyrus-calendar-disabled-color);
     background-color: var(--papyrus-calendar-disabled-bg-color);
@@ -105,13 +94,11 @@ To set the minimum and/or maximum value:
   td.day-disabled paper-ripple {
     display: none;
   }
-
   td.day-selected {
     color: var(--papyrus-calendar-selected-color);
     background-color: var(--papyrus-calendar-selected-bg-color);
     cursor: default;
   }
-
 </style>
 <template>
   <table>
@@ -185,10 +172,7 @@ To set the minimum and/or maximum value:
         type: String,
         reflectToAttribute: true,
         notify: true,
-        observer: '_handleDisplayChanged',
-        value: function() {
-          return moment().date(1).format('YYYY-MM');
-        }
+        observer: '_handleDisplayChanged'
       }
     },
 
@@ -298,8 +282,11 @@ To set the minimum and/or maximum value:
       var max = this._max;
       var display = this._display;
 
+      // update the display property if it was undefined
       if (!display) {
         display = (value ? value : moment()).startOf('month');
+        this.display = display.format('YYYY-MM');
+        return;
       }
 
       // check bounds
