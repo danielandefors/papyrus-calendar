@@ -26,6 +26,12 @@ To set the minimum and/or maximum value:
 <papyrus-calendar min="2015-01-01" max="2015-12-31"></papyrus-calendar>
 ```
 
+Disable `<paper-ripple>` effect.
+
+``` html
+<papyrus-calendar noink></papyrus-calendar>
+```
+
 @demo
 -->
 <dom-module id="papyrus-calendar">
@@ -173,6 +179,12 @@ To set the minimum and/or maximum value:
         reflectToAttribute: true,
         notify: true,
         observer: '_handleDisplayChanged'
+      },
+
+      /** Disables paper ripple effects. */
+      noink: {
+        type: Boolean,
+        default: false
       }
     },
 
