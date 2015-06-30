@@ -6,48 +6,117 @@
   <script src="../../webcomponentsjs/webcomponents-lite.min.js"></script>
   <link rel="import" href="../../font-roboto/roboto.html">
   <link rel="import" href="../../paper-button/paper-button.html">
+  <link rel="import" href="../../paper-material/paper-material.html">
   <link rel="import" href="../papyrus-calendar.html">
   <style is="custom-style">
     html {
       font-family: Roboto;
-      font-size: 12pt;
+      font-size: 16pt;
     }
-    papyrus-calendar {
-      margin-right: 2em;
+    paper-material {
+      display: inline-block;
     }
-    #calendar_2 {
-      --papyrus-calendar-header-bg-color: orange;
-      --papyrus-calendar-selected-bg-color: darkGreen;
-    }
-    #calendar_3 {
-      --papyrus-calendar-header-color: white;
-      --papyrus-calendar-header-bg-color: darkBlue;
-      --papyrus-calendar-selected-color: white;
-      --papyrus-calendar-selected-bg-color: red;
+    .custom_style {
+      --papyrus-calendar-header-color: #FFFFFF;
+      --papyrus-calendar-header-bg-color: #7B1FA2;
+      --papyrus-calendar-selected-bg-color: #FF4081;
     }
   </style>
   <script>
-  window.addEventListener('load', function() {
-    document.querySelector('#calendar_1').addEventListener(
-      'papyrus-calendar-date-selected', function(event) {
-        document.querySelector('#output').textContent = event.detail;
-      });
-  });
-  function setToday() {
-    document.querySelector('#calendar_1').today();
-  }
+
+    window.addEventListener('load', function() {
+
+      document.querySelector('#simple').addEventListener(
+        'papyrus-calendar-date-selected',
+        function(event) {
+          document.querySelector('#simpleout').textContent = event.detail;
+        });
+
+      var days = document.querySelector('#days');
+      var range = document.querySelector('#range');
+      days.textContent = range.days;
+      range.addEventListener(
+        'date-range-demo-selection-changed',
+        function(event) {
+          days.textContent = range.days;
+        });
+
+    });
+
+    function setToday() {
+      document.querySelector('#simple').today();
+    }
+
   </script>
 </head>
 <body unresolved>
-  <p>An example of <code>&lt;papyrus-calendar&gt;</code>:</p>
-  <template is="dom-bind">
-    <papyrus-calendar id="calendar_1" value="{{val}}" display="{{disp}}"></papyrus-calendar>
-    <papyrus-calendar id="calendar_2" value="[[val]]" display="[[disp]]"></papyrus-calendar>
-    <papyrus-calendar id="calendar_3" min="2015-07-02" max="2015-08-15" value="2015-07-04" noink></papyrus-calendar>
-  </template>
-  <p>Selected date: <span id="output"></span></p>
-  <p>
-    <paper-button onclick="setToday()" raised>Select today's date</paper-button>
-  </p>
+
+  <h2>Simple Example</h2>
+  <p>A simple example. Select a date by clicking on the calendar or the button below.</p>
+  <paper-material elevation="1">
+    <papyrus-calendar id="simple"></papyrus-calendar>
+  </paper-material>
+  <p><paper-button onclick="setToday()" raised>Select today's date</paper-button></p>
+  <p>Selected date: <span id="simpleout"></span></p>
+
+  <h2>Custom Style Example</h2>
+  <paper-material>
+    <papyrus-calendar class="custom_style" value="2015-06-29"></papyrus-calendar>
+  </paper-material>
+
+  <h2>Date Range Example</h2>
+  <p>Example using two <code>&lt;papyrus-calendar&gt;</code> elements.</p>
+  <p>Range: <i><span id="days"></span> days selected.<br></i></p>
+  <dom-module id="date-range-demo">
+    <template>
+      <papyrus-calendar id="from" value="{{from}}" highlight="[[to]]"></papyrus-calendar>
+      <papyrus-calendar id="to" value="{{to}}" min="[[from]]" highlight="[[from]]"></papyrus-calendar>
+    </template>
+    <script>
+      Polymer({
+        is: 'date-range-demo',
+        properties: {
+          from: {
+            type: String,
+            notify: true,
+            reflectToAttribute: true,
+            observer: 'handleChange'
+          },
+          to: {
+            type: String,
+            notify: true,
+            reflectToAttribute: true,
+            observer: 'handleChange'
+          },
+          days: {
+            type: Number,
+            notify: true,
+            reflectToAttribute: true,
+            computed: 'computeDays(from,to)'
+          }
+        },
+        computeDays: function(from,to) {
+          var f = moment(from);
+          var days = 1 + moment(to).diff(f, 'days');
+          if (this.days >= 0 && days <= 0) {
+            this.to = moment(f).add(this.days - 1, 'days').format('YYYY-MM-DD');
+            return this.days;
+          } else {
+            return days;
+          }
+        },
+        handleChange: function() {
+          if (this.days > 0) {
+            this.fire('date-range-demo-selection-changed', {
+              from: this.from,
+              to: this.to,
+              days: this.days
+            });
+          }
+        }
+      });
+    </script>
+  </dom-module>
+  <date-range-demo id="range" from='2015-07-08' to='2015-07-22'></date-range-demo>
 </body>
 </html>

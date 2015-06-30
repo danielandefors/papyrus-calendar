@@ -56,7 +56,9 @@ Disable `<paper-ripple>` effect.
     --papyrus-calendar-disabled-color: var(--disabled-text-color);
     --papyrus-calendar-disabled-bg-color: #f4f4f4;
     --papyrus-calendar-selected-color: var(--text-primary-color);
-    --papyrus-calendar-selected-bg-color: var(--accent-color);
+    --papyrus-calendar-selected-bg-color: var(--default-primary-color);
+    --papyrus-calendar-highlighted-color: var(--text-primary-color);
+    --papyrus-calendar-highlighted-bg-color: var(--light-primary-color);
   }
   :host[noink] /deep/ paper-ripple {
     display: none;
@@ -99,6 +101,10 @@ Disable `<paper-ripple>` effect.
   }
   td.day-disabled paper-ripple {
     display: none;
+  }
+  td.day-highlighted {
+    color: var(--papyrus-calendar-highlighted-color);
+    background-color: var(--papyrus-calendar-highlighted-bg-color);
   }
   td.day-selected {
     color: var(--papyrus-calendar-selected-color);
@@ -181,6 +187,14 @@ Disable `<paper-ripple>` effect.
         observer: '_handleDisplayChanged'
       },
 
+      /** Gets or sets the maximum date. */
+      highlight: {
+        type: String,
+        reflectToAttribute: true,
+        notify: true,
+        observer: '_handleHighlightChanged'
+      },
+
       /** Disables paper ripple effects. */
       noink: {
         type: Boolean,
@@ -192,10 +206,10 @@ Disable `<paper-ripple>` effect.
        * @param {String} detail The selected date.
        * @event papyrus-calendar-date-selected
        */
-    },
+     },
 
-    /** Initialize the component. */
-    ready: function() {
+     /** Initialize the component. */
+     ready: function() {
       this._weekDays = [0,1,2,3,4,5,6].map(function(d){
         return moment().day(d).format('dd');
       });
@@ -264,6 +278,12 @@ Disable `<paper-ripple>` effect.
       this._build();
     },
 
+    /** Observes the `highlight` property. */
+    _handleHighlightChanged: function() {
+      this._highlight = this._parse(this.highlight);
+      this._build();
+    },
+
     /** Validates if the value is within bounds */
     _validate: function() {
       if (this._value) {
@@ -288,6 +308,16 @@ Disable `<paper-ripple>` effect.
       if (!target.classList.contains('day-disabled')) {
         this.value = target.dataset.value;
       }
+    },
+
+    /** Check if `day` should be highlighted/ */
+    _checkHighlighted: function(day) {
+      var v = this._value;
+      var h = this._highlight;
+      if (v && h) {
+        return day.isSame(h) || day.isBetween(v, h) || day.isBetween(h, v);
+      }
+      return false;
     },
 
     /** Builds the calendar UI */
@@ -347,7 +377,10 @@ Disable `<paper-ripple>` effect.
             classes.push('day-disabled');
           } else if (data.selected) {
             classes.push('day-selected');
-          } else if (day.month() !== currentMonth) {
+          } else if (this._checkHighlighted(day)) {
+            classes.push('day-highlighted');
+          }
+          if (day.month() !== currentMonth) {
             classes.push('day-outside-month');
           }
           data.classes = classes.join(' ');
