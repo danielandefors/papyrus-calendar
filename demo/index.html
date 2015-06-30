@@ -1,0 +1,41 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <script src="../../webcomponentsjs/webcomponents-lite.min.js"></script>
+  <link rel="import" href="../../font-roboto/roboto.html">
+  <link rel="import" href="../../paper-button/paper-button.html">
+  <link rel="import" href="../papyrus-calendar.html">
+  <style is="custom-style">
+    html {
+      font-family: Roboto;
+      font-size: 12pt;
+    }
+    papyrus-calendar {
+      margin-right: 2em;
+    }
+    #calendar_1 {
+      --papyrus-calendar-header-bg-color: orange;
+      --papyrus-calendar-selected-bg-color: darkGreen;
+    }
+    #calendar_2 {
+      --papyrus-calendar-header-color: white;
+      --papyrus-calendar-header-bg-color: darkBlue;
+      --papyrus-calendar-selected-color: white;
+      --papyrus-calendar-selected-bg-color: red;
+    }
+  </style>
+</head>
+<body unresolved>
+  <p>An example of <code>&lt;papyrus-calendar&gt;</code>:</p>
+  <template is="dom-bind">
+    <papyrus-calendar id="calendar_1" value="{{value}}" display="{{display}}"></papyrus-calendar>
+    <papyrus-calendar id="calendar_2" value="{{value}}" display="{{display}}" noink></papyrus-calendar>
+    <papyrus-calendar id="calendar_3" min="2015-07-01" max="2015-07-15" value="2015-07-04"></papyrus-calendar>
+  </template>
+  <p>
+    <paper-button onclick="document.getElementById('calendar_1').today()" raised>Select today's date</paper-button>
+  </p>
+</body>
+</html>
