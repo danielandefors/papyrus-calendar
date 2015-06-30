@@ -26,16 +26,28 @@
       --papyrus-calendar-selected-bg-color: red;
     }
   </style>
+  <script>
+  window.addEventListener('load', function() {
+    document.querySelector('#calendar_1').addEventListener(
+      'papyrus-calendar-date-selected', function(event) {
+        document.querySelector('#output').textContent = event.detail;
+      });
+  });
+  function setToday() {
+    document.querySelector('#calendar_1').today();
+  }
+  </script>
 </head>
 <body unresolved>
   <p>An example of <code>&lt;papyrus-calendar&gt;</code>:</p>
   <template is="dom-bind">
-    <papyrus-calendar id="calendar_1" value="{{value}}" display="{{display}}"></papyrus-calendar>
-    <papyrus-calendar id="calendar_2" value="{{value}}" display="{{display}}" noink></papyrus-calendar>
-    <papyrus-calendar id="calendar_3" min="2015-07-01" max="2015-07-15" value="2015-07-04"></papyrus-calendar>
+    <papyrus-calendar id="calendar_1" value="{{val}}" display="{{disp}}"></papyrus-calendar>
+    <papyrus-calendar id="calendar_2" value="[[val]]" display="[[disp]]"></papyrus-calendar>
+    <papyrus-calendar id="calendar_3" min="2015-07-02" max="2015-08-15" value="2015-07-04" noink></papyrus-calendar>
   </template>
+  <p>Selected date: <span id="output"></span></p>
   <p>
-    <paper-button onclick="document.querySelector('#calendar_1').today()" raised>Select today's date</paper-button>
+    <paper-button onclick="setToday()" raised>Select today's date</paper-button>
   </p>
 </body>
 </html>

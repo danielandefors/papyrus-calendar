@@ -186,6 +186,12 @@ Disable `<paper-ripple>` effect.
         type: Boolean,
         default: false
       }
+
+      /**
+       * Broadcast when the selected date changes.
+       * @param {String} detail The selected date.
+       * @event papyrus-calendar-date-selected
+       */
     },
 
     /** Initialize the component. */
@@ -235,6 +241,7 @@ Disable `<paper-ripple>` effect.
         this.display = this._value.format('YYYY-MM');
       }
       this._build();
+      this.fire('papyrus-calendar-date-selected', this.value);
     },
 
     /** Observes the `min` property. */
