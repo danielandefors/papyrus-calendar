@@ -1,0 +1,51 @@
+
+<dom-module id="date-range-demo">
+<template>
+  <papyrus-calendar id="from" value="{{from}}" highlight="[[to]]"></papyrus-calendar>
+  <papyrus-calendar id="to" value="{{to}}" min="[[from]]" highlight="[[from]]"></papyrus-calendar>
+</template>
+</dom-module>
+<script>
+  Polymer({
+    is: 'date-range-demo',
+    properties: {
+      from: {
+        type: String,
+        notify: true,
+        reflectToAttribute: true,
+        observer: 'handleChange'
+      },
+      to: {
+        type: String,
+        notify: true,
+        reflectToAttribute: true,
+        observer: 'handleChange'
+      },
+      days: {
+        type: Number,
+        notify: true,
+        reflectToAttribute: true,
+        computed: 'computeDays(from,to)'
+      }
+    },
+    computeDays: function(from,to) {
+      var f = moment(from);
+      var days = 1 + moment(to).diff(f, 'days');
+      if (this.days >= 0 && days <= 0) {
+        this.to = moment(f).add(this.days - 1, 'days').format('YYYY-MM-DD');
+        return this.days;
+      } else {
+        return days;
+      }
+    },
+    handleChange: function() {
+      if (this.days > 0) {
+        this.fire('date-range-demo-selection-changed', {
+          from: this.from,
+          to: this.to,
+          days: this.days
+        });
+      }
+    }
+  });
+</script>

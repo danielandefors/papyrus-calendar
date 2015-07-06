@@ -4,14 +4,16 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
   <script src="../../webcomponentsjs/webcomponents-lite.min.js"></script>
+  <link rel="import" href="../../polymer/polymer.html">
   <link rel="import" href="../../font-roboto/roboto.html">
   <link rel="import" href="../../paper-button/paper-button.html">
   <link rel="import" href="../../paper-material/paper-material.html">
   <link rel="import" href="../papyrus-calendar.html">
+  <link rel="import" href="date-range-demo.html">
   <style is="custom-style">
     html {
-      font-family: Roboto;
-      font-size: 16pt;
+      font-family: Roboto, sans-serif;
+      font-size: 14px;
     }
     paper-material {
       display: inline-block;
@@ -67,56 +69,7 @@
   <h2>Date Range Example</h2>
   <p>Example using two <code>&lt;papyrus-calendar&gt;</code> elements.</p>
   <p>Range: <i><span id="days"></span> days selected.<br></i></p>
-  <dom-module id="date-range-demo">
-    <template>
-      <papyrus-calendar id="from" value="{{from}}" highlight="[[to]]"></papyrus-calendar>
-      <papyrus-calendar id="to" value="{{to}}" min="[[from]]" highlight="[[from]]"></papyrus-calendar>
-    </template>
-    <script>
-      Polymer({
-        is: 'date-range-demo',
-        properties: {
-          from: {
-            type: String,
-            notify: true,
-            reflectToAttribute: true,
-            observer: 'handleChange'
-          },
-          to: {
-            type: String,
-            notify: true,
-            reflectToAttribute: true,
-            observer: 'handleChange'
-          },
-          days: {
-            type: Number,
-            notify: true,
-            reflectToAttribute: true,
-            computed: 'computeDays(from,to)'
-          }
-        },
-        computeDays: function(from,to) {
-          var f = moment(from);
-          var days = 1 + moment(to).diff(f, 'days');
-          if (this.days >= 0 && days <= 0) {
-            this.to = moment(f).add(this.days - 1, 'days').format('YYYY-MM-DD');
-            return this.days;
-          } else {
-            return days;
-          }
-        },
-        handleChange: function() {
-          if (this.days > 0) {
-            this.fire('date-range-demo-selection-changed', {
-              from: this.from,
-              to: this.to,
-              days: this.days
-            });
-          }
-        }
-      });
-    </script>
-  </dom-module>
   <date-range-demo id="range" from='2015-07-08' to='2015-07-22'></date-range-demo>
+
 </body>
 </html>
