@@ -1,0 +1,399 @@
+
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../iron-icons/image-icons.html">
+<link rel="import" href="../paper-styles/paper-styles.html">
+<link rel="import" href="../paper-ripple/paper-ripple.html">
+<link rel="import" href="../paper-icon-button/paper-icon-button.html">
+<script src="../moment/min/moment.min.js"></script>
+
+<!--
+
+Polymer element that shows a calendar.
+
+``` html
+<papyrus-calendar></papyrus-calendar>
+```
+
+To set the value:
+
+``` html
+<papyrus-calendar value="2015-03-04"></papyrus-calendar>
+```
+
+To set the minimum and/or maximum value:
+
+``` html
+<papyrus-calendar min="2015-01-01" max="2015-12-31"></papyrus-calendar>
+```
+
+Disable `<paper-ripple>` effect.
+
+``` html
+<papyrus-calendar noink></papyrus-calendar>
+```
+
+@demo
+-->
+<dom-module id="papyrus-calendar">
+<style is="custom-style">
+  :host {
+    display: inline-block;
+    position: relative;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font: inherit;
+    outline: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -webkit-user-select: none;
+    user-select: none;
+    z-index: 0;
+    cursor: default;
+    --papyrus-calendar-cell-size: 1.75em;
+    --papyrus-calendar-header-color: var(--primary-text-color);
+    --papyrus-calendar-header-bg-color: var(--divider-color);
+    --papyrus-calendar-disabled-color: var(--disabled-text-color);
+    --papyrus-calendar-disabled-bg-color: #f4f4f4;
+    --papyrus-calendar-selected-color: var(--text-primary-color);
+    --papyrus-calendar-selected-bg-color: var(--default-primary-color);
+    --papyrus-calendar-highlighted-color: var(--text-primary-color);
+    --papyrus-calendar-highlighted-bg-color: var(--light-primary-color);
+  }
+  :host[noink] /deep/ paper-ripple {
+    display: none;
+  }
+  table {
+    border-spacing: 0;
+    border-collapse: collapse;
+  }
+  td, th {
+    position: relative;
+    width: var(--papyrus-calendar-cell-size);
+    height: var(--papyrus-calendar-cell-size);
+    font-weight: normal;
+    text-align: center;
+    padding: 0;
+  }
+  th {
+    color: var(--papyrus-calendar-header-color);
+    background-color: var(--papyrus-calendar-header-bg-color);
+  }
+  th paper-icon-button,
+  th /deep/ iron-icon {
+    width: var(--papyrus-calendar-cell-size);
+    height: var(--papyrus-calendar-cell-size);
+    padding: 0;
+  }
+  td.day {
+    cursor: pointer;
+  }
+  td.day paper-ripple {
+    color: var(--papyrus-calendar-selected-bg-color);
+  }
+  td.day-outside-month {
+    color: var(--disabled-text-color);
+  }
+  td.day-disabled {
+    color: var(--papyrus-calendar-disabled-color);
+    background-color: var(--papyrus-calendar-disabled-bg-color);
+    cursor: default;
+  }
+  td.day-disabled paper-ripple {
+    display: none;
+  }
+  td.day-highlighted {
+    color: var(--papyrus-calendar-highlighted-color);
+    background-color: var(--papyrus-calendar-highlighted-bg-color);
+  }
+  td.day-selected {
+    color: var(--papyrus-calendar-selected-color);
+    background-color: var(--papyrus-calendar-selected-bg-color);
+    cursor: default;
+  }
+</style>
+<template>
+  <table>
+    <thead>
+      <tr>
+        <th class="control">
+          <template is="dom-if" if="[[_prev]]">
+            <paper-icon-button icon="image:navigate-before" on-click="previousMonth"></paper-icon-button>
+          </template>
+        </th>
+        <th colspan="5"><span>[[_month]]</span>, <span>[[_year]]</span></th>
+        <th class="control">
+          <template is="dom-if" if="[[_next]]">
+            <paper-icon-button icon="image:navigate-next" on-click="nextMonth"></paper-icon-button>
+          </template>
+        </th>
+      </tr>
+      <tr>
+        <template is="dom-repeat" items="[[_weekDays]]">
+          <th class="weekday">[[item]]</th>
+        </template>
+      </tr>
+    </thead>
+    <tbody>
+      <template is="dom-repeat" items="[[_grid]]">
+        <tr>
+          <template is="dom-repeat" items="[[item]]">
+            <td class$="[[item.classes]]" data-value$="[[item.value]]" on-tap="_select">
+              <paper-ripple center></paper-ripple>
+              <span>[[item.day]]</span>
+            </td>
+          </template>
+        </tr>
+      </template>
+    </tbody>
+  </table>
+</template>
+<script>
+  'use strict';
+  Polymer({
+    is: 'papyrus-calendar',
+
+    properties: {
+
+      /** Gets or sets the selected date. */
+      value: {
+        type: String,
+        reflectToAttribute: true,
+        notify: true,
+        observer: '_handleValueChanged'
+      },
+
+      /** Gets or sets the minimum date. */
+      min: {
+        type: String,
+        reflectToAttribute: true,
+        notify: true,
+        observer: '_handleMinChanged'
+      },
+
+      /** Gets or sets the maximum date. */
+      max: {
+        type: String,
+        reflectToAttribute: true,
+        notify: true,
+        observer: '_handleMaxChanged'
+      },
+
+      /** Gets or sets the displayed month. */
+      display: {
+        type: String,
+        reflectToAttribute: true,
+        notify: true,
+        observer: '_handleDisplayChanged'
+      },
+
+      /** Gets or sets the maximum date. */
+      highlight: {
+        type: String,
+        reflectToAttribute: true,
+        notify: true,
+        observer: '_handleHighlightChanged'
+      },
+
+      /** Disables paper ripple effects. */
+      noink: {
+        type: Boolean,
+        default: false
+      }
+
+      /**
+       * Broadcast when the selected date changes.
+       * @param {String} detail The selected date.
+       * @event papyrus-calendar-date-selected
+       */
+     },
+
+     /** Initialize the component. */
+     ready: function() {
+      this._weekDays = [0,1,2,3,4,5,6].map(function(d){
+        return moment().day(d).format('dd');
+      });
+      this._build();
+    },
+
+    /** Show next month. */
+    nextMonth: function() {
+      this.display = this._display.add(1, 'months').format('YYYY-MM');
+    },
+
+    /** Show previous month. */
+    previousMonth: function() {
+      this.display = this._display.subtract(1, 'months').format('YYYY-MM');
+    },
+
+    /** Show current month. */
+    currentMonth: function() {
+      this.display = moment().format('YYYY-MM');
+    },
+
+    /** Select the current date. */
+    today: function() {
+      this.value = moment().format('YYYY-MM-DD');
+      this.currentMonth();
+    },
+
+    /** Parse a string into a momentjs object */
+    _parse: function(s, format) {
+      if (s) {
+        var m = moment(s, format || 'YYYY-MM-DD');
+        if (m.isValid()) {
+          return m;
+        }
+      }
+      return null;
+    },
+
+    /** Observes the `value` property. */
+    _handleValueChanged: function() {
+      this._value = this._parse(this.value);
+      if (this._value && this._validate()) {
+        this.display = this._value.format('YYYY-MM');
+      }
+      this._build();
+      this.fire('papyrus-calendar-date-selected', this.value);
+    },
+
+    /** Observes the `min` property. */
+    _handleMinChanged: function() {
+      this._min = this._parse(this.min);
+      this._validate();
+      this._build();
+    },
+
+    /** Observes the `max` property. */
+    _handleMaxChanged: function() {
+      this._max = this._parse(this.max);
+      this._validate();
+      this._build();
+    },
+
+    /** Observes the `display` property. */
+    _handleDisplayChanged: function() {
+      this._display = this._parse(this.display, 'YYYY-MM');
+      this._build();
+    },
+
+    /** Observes the `highlight` property. */
+    _handleHighlightChanged: function() {
+      this._highlight = this._parse(this.highlight);
+      this._build();
+    },
+
+    /** Validates if the value is within bounds */
+    _validate: function() {
+      if (this._value) {
+        if (this._min && this._value.isBefore(this._min)) {
+          this.value = undefined;
+          return false;
+        }
+        if (this._max && this._value.isAfter(this._max)) {
+          this.value = undefined;
+          return false;
+        }
+      }
+      return true;
+    },
+
+    /** When a date was selected */
+    _select: function(e) {
+      var target = e.target;
+      if (target.tagName !== 'TD') {
+        target = target.parentElement;
+      }
+      if (!target.classList.contains('day-disabled')) {
+        this.value = target.dataset.value;
+      }
+    },
+
+    /** Check if `day` should be highlighted/ */
+    _checkHighlighted: function(day) {
+      var v = this._value;
+      var h = this._highlight;
+      if (v && h) {
+        return day.isSame(h) || day.isBetween(v, h) || day.isBetween(h, v);
+      }
+      return false;
+    },
+
+    /** Builds the calendar UI */
+    _build: function() {
+      if (!this._weekDays) {
+        return;
+      }
+
+      var value = this._value;
+      var min = this._min;
+      var max = this._max;
+      var display = this._display;
+
+      // update the display property if it was undefined
+      if (!display) {
+        display = (value ? value : moment()).startOf('month');
+      }
+
+      // check bounds
+      var last = moment(display).endOf('month');
+      if (min && min.isAfter(last)) {
+        display = moment(min).startOf('month');
+        last = moment(display).endOf('month');
+      }
+      if (max && display.isAfter(max)) {
+        display = moment(max).startOf('month');
+        last = moment(display).endOf('month');
+      }
+
+      // update the display property if it was undefined
+      if (!this._display || !this._display.isSame(display)) {
+        this.display = display.format('YYYY-MM');
+        return;
+      }
+
+      // update header properties
+      this._year = display.year();
+      this._month = display.format('MMMM');
+      this._prev = !min || display.isAfter(min);
+      this._next = !max || last.isBefore(max);
+
+      // update the calendar grid
+      var grid = [];
+      var day = moment(display).weekday(0);
+      var currentMonth = display.month();
+      var selected = value ? value.format('YYYY-MM-DD') : '';
+      for (var i = 0; i < 6; i++) {
+        grid[i] = [];
+        for (var j = 0; j < 7; j++) {
+          var data = { day: day.date(), value: day.format('YYYY-MM-DD') };
+          data.disabled = (min && day.isBefore(min)) || (max && day.isAfter(max));
+          data.selected = data.value === selected;
+
+          // generate classes list for day
+          var classes = ['day'];
+          if (data.disabled) {
+            classes.push('day-disabled');
+          } else if (data.selected) {
+            classes.push('day-selected');
+          } else if (this._checkHighlighted(day)) {
+            classes.push('day-highlighted');
+          }
+          if (day.month() !== currentMonth) {
+            classes.push('day-outside-month');
+          }
+          data.classes = classes.join(' ');
+
+          grid[i][j] = data;
+          day.add(1, 'days');
+        }
+      }
+
+      this._grid = grid;
+    }
+
+  });
+</script>
+</dom-module>
+
